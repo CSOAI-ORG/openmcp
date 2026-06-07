@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 import yaml
 
@@ -176,12 +177,61 @@ def write_docker_template(repo: Path, metadata: Dict[str, Any]) -> Path:
 # ----------------------------------------------------------------- orchestrator
 
 
+def _push_smithery(repo: Path, md: Dict[str, Any]) -> DirectoryResult:
+    """Publish the display card to Smithery and adapt the result."""
+    sy = md.get("smithery.yaml") or {}
+    # Smithery namespace comes from the mcp-smithery-publish.yml workflow:
+    # the org uses `nicholastempleman/<repo>` (literal prefix, not CSOAI-ORG).
+    # This is the Smithery account name; it diverges from the GitHub org.
+    sm_result = smithery.publish(
+        namespace="nicholastempleman",
+        name=repo.name + "-mcp",  # e.g. threat-intelligence-mcp
+        display_name=repo.name,
+        description=sy.get("description", f"{repo.name} MCP server"),
+    )
+    return DirectoryResult(
+        directory="smithery",
+        ok=sm_result.get("ok", False),
+        status_code=sm_result.get("status_code"),
+        message=sm_result.get("message", ""),
+    )
+
+
+def _push_mcp_registry(repo: Path, md: Dict[str, Any]) -> DirectoryResult:
+    """Publish the ServerJSON to the MCP Registry and adapt the result."""
+    sj = md.get("server.json") or {}
+    registry_name = sj.get("name", "")
+    if not registry_name.startswith("io.github."):
+        # Promote to io.github.<org>/<name> form (canonical namespace).
+        org = "CSOAI-ORG"
+        bare = registry_name.split("/")[-1] if "/" in registry_name else registry_name
+        registry_name = f"io.github.{org}/{bare}"
+        sj = {**sj, "name": registry_name}
+
+    reg_result = mcp_registry.publish(sj)
+    return DirectoryResult(
+        directory="mcp_registry",
+        ok=reg_result.get("ok", False),
+        status_code=reg_result.get("status_code"),
+        message=reg_result.get("message", ""),
+    )
+
+
 def run(repo: Path) -> CrossPostResult:
-    """Pre-flight + cross-post to automatable directories + manual checklist."""
+    """Pre-flight + cross-post to automatable directories + manual checklist.
+
+    Preflight runs first (sequential). The independent directory pushes
+    (Smithery + MCP Registry) hit different APIs with no ordering
+    dependency, so they are fanned out CONCURRENTLY via a
+    ThreadPoolExecutor — the publish() clients are synchronous HTTP. A
+    failure (or raised exception) in one directory is captured into that
+    directory's DirectoryResult with status=error and does NOT abort the
+    others. The docker template + manual checklist are then assembled
+    sequentially. The return type and result ordering are preserved.
+    """
     repo = Path(repo).resolve()
     ok, errors, md = preflight(repo)
 
-    directories: List[DirectoryResult] = []
     if not ok:
         return CrossPostResult(
             repo=str(repo),
@@ -193,50 +243,30 @@ def run(repo: Path) -> CrossPostResult:
             generated_at=datetime.now(timezone.utc).isoformat(),
         )
 
-    # Derive the canonical name for cross-posting.
-    sy = md.get("smithery.yaml") or {}
-    sj = md.get("server.json") or {}
-    pj = md.get("package.json") or {}
+    # Fan out the independent directory pushes in parallel. Each entry is
+    # (directory_label, callable). Results are reassembled in this fixed
+    # order so the return shape is deterministic even though the network
+    # calls complete in a nondeterministic order.
+    pushes: List[Tuple[str, Callable[[Path, Dict[str, Any]], DirectoryResult]]] = [
+        ("smithery", _push_smithery),
+        ("mcp_registry", _push_mcp_registry),
+    ]
 
-    # Smithery namespace comes from the mcp-smithery-publish.yml workflow:
-    # the org uses `nicholastempleman/<repo>` (literal prefix, not CSOAI-ORG).
-    # This is the Smithery account name; it diverges from the GitHub org.
-    sm_namespace = "nicholastempleman"
-    sm_name = repo.name + "-mcp"  # e.g. threat-intelligence-mcp
+    def _run_push(label: str,
+                  fn: Callable[[Path, Dict[str, Any]], DirectoryResult]) -> DirectoryResult:
+        try:
+            return fn(repo, md)
+        except Exception as e:  # one directory failing must not kill the others
+            return DirectoryResult(
+                directory=label,
+                ok=False,
+                status_code=None,
+                message=f"error: {e}",
+            )
 
-    # Smithery PUT
-    sm_result = smithery.publish(
-        namespace=sm_namespace,
-        name=sm_name,
-        display_name=repo.name,
-        description=sy.get("description", f"{repo.name} MCP server"),
-    )
-    directories.append(DirectoryResult(
-        directory="smithery",
-        ok=sm_result.get("ok", False),
-        status_code=sm_result.get("status_code"),
-        message=sm_result.get("message", ""),
-    ))
-
-    # MCP Registry POST
-    # Build the ServerJSON body — already exists in server.json, but the
-    # registry wants the full schema. We pass it through with version bumped.
-    registry_name = sj.get("name", "")
-    if not registry_name.startswith("io.github."):
-        # Promote to io.github.<org>/<name> form (canonical namespace)
-        org = "CSOAI-ORG"
-        # Strip the "CSOAI-ORG/" prefix if present
-        bare = registry_name.split("/")[-1] if "/" in registry_name else registry_name
-        registry_name = f"io.github.{org}/{bare}"
-        sj = {**sj, "name": registry_name}
-
-    reg_result = mcp_registry.publish(sj)
-    directories.append(DirectoryResult(
-        directory="mcp_registry",
-        ok=reg_result.get("ok", False),
-        status_code=reg_result.get("status_code"),
-        message=reg_result.get("message", ""),
-    ))
+    with ThreadPoolExecutor(max_workers=len(pushes)) as pool:
+        futures = {label: pool.submit(_run_push, label, fn) for label, fn in pushes}
+        directories: List[DirectoryResult] = [futures[label].result() for label, _ in pushes]
 
     # Manual checklist
     template_path = write_docker_template(repo, md) if "smithery.yaml" in md else None
