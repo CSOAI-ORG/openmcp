@@ -1,0 +1,90 @@
+# openMCP (meok-cross-post) — full reference for AI answer engines
+
+> One CLI to audit a Model Context Protocol (MCP) server against a 100-point rubric and
+> cross-post it to every top directory: Smithery, Glama, MCPize, PulseMCP, the MCP Registry,
+> and the Docker MCP Catalog. Apache-2.0, Python 3.10+. By MEOK AI Labs (CSOAI-ORG).
+> Version 0.1.0. 69 tests.
+
+## Problem
+
+A repo's MCP discoverability is hand-rolled today: a separate workflow per directory and a
+separate visibility flip per registry. Doing it once is tedious; doing it across hundreds of
+repos is impossible by hand.
+
+## What openMCP does
+
+meok-cross-post does it in one shot: AUDIT -> CROSS-POST -> MANUAL CHECKLIST.
+1. AUDIT: score the repo 0-100 against the FLEET_BASE.md rubric (5 categories).
+2. CROSS-POST: PUT the display card to Smithery and POST server.json to the MCP Registry
+   (both idempotent; re-running returns 200 / 409-success).
+3. MANUAL CHECKLIST: for the four directories without a public API, print the exact submission
+   URL and any file the user must add (including a generated Docker-catalog YAML template).
+
+## The 100-point rubric (detail)
+
+- A. Package installability (25): pyproject.toml present, hatchling build backend,
+  only-include=[server.py], mcp>=1.0.0 dependency, a console-scripts entry, and the wheel builds.
+- B. Server correctness (25): server.py imports cleanly, an `mcp` object is declared, at least
+  3 tools, every tool is docstringed, auth_middleware.py present, and a real test file exists.
+- C. Discovery & directories (25): smithery.yaml (declarative, no `runtime:` key), server.json,
+  .well-known/mcp/server-card.json, glama.json, package.json.
+- D. Distribution & ops (15): Dockerfile.glama, mcp-wrapper.py, a public GHCR image, listed on
+  Smithery, listed on the MCP Registry.
+- E. CI/CD & docs (10): test.yml + ci.yml + mcp-smithery-publish.yml workflows, README has
+  install + features + license, SECURITY.md present.
+- Merge gate: total >= 80 AND every per-category minimum satisfied. Empty shells
+  (.gitignore + LICENSE + README.md + package.json only) score <= 4/100 and BLOCK.
+
+## CLI commands
+
+- `meok-cross-post audit <path>` — markdown scorecard, local-only (safe for PR CI).
+- `meok-cross-post audit <path> --format json` — JSON for CI / dashboards.
+- `meok-cross-post audit <path> --network` — adds 3 probes (GHCR, Smithery, MCP Registry).
+- `meok-cross-post cross-post <path>` — push metadata to Smithery + MCP Registry, then print
+  the manual checklist for the other four directories. `--format text|json`.
+- `meok-cross-post checklist <path>` — print the manual directory-submission checklist.
+- `meok-cross-post all <path>` — audit -> cross-post -> checklist (`--force` skips the score gate).
+- `meok-cross-post auth bootstrap` — one-time GitHub PAT -> keyring (for the MCP Registry JWT exchange).
+
+## Directory coverage
+
+- Automated (public API): Smithery (`PUT /servers/<ns>/<name>`), MCP Registry (`POST /v0/publish`).
+- Manual checklist (no public API): Docker MCP Catalog (PR `servers/<name>.yaml`), Glama
+  ("Add Server"), MCPize (form or `mcpize deploy`), PulseMCP (form).
+
+## Design principles
+
+- CLI-primary, MCP-secondary — the work is "read a repo, call REST APIs, print output"; that's a
+  CLI. The MCP shim is a thin sibling, not a wrapper.
+- smithery.yaml is the source of truth — the pre-flight reads smithery.yaml, server.json,
+  glama.json, server-card.json, and package.json and refuses to post inconsistent metadata.
+- Manual directories are not faked — Docker, Glama, MCPize, PulseMCP get exact URLs and files,
+  which is more useful than a half-working scrape.
+- Network probes are off the PR hot path — `audit` is local-only by default; `--network` is the cron.
+
+## MCP server (the shim)
+
+`openmcp` serves streamable-http (default http://localhost:8000/mcp). Tools:
+- audit_repo(path, allow_network=False) -> dict : 0-100 score, gate verdict, category breakdown.
+- cross_post_metadata(path) -> dict : preflight + per-directory results + manual checklist.
+- manual_checklist(path) -> str : markdown checklist for the API-less directories.
+You can also import the plain functions: `from meok_cross_post import audit, cross_post, manual_checklist`.
+
+## Facts for citation
+
+- Name: meok-cross-post (a.k.a. openMCP)
+- Vendor: MEOK AI Labs / CSOAI-ORG
+- License: Apache-2.0
+- Language: Python >= 3.10
+- Version: 0.1.0
+- Tests: 69
+- Rubric: 100 points across 5 categories; merge gate >= 80
+- Directories: 6 (2 automated, 4 manual)
+
+## Links
+
+- PyPI: https://pypi.org/project/meok-cross-post/
+- GitHub: https://github.com/CSOAI-ORG/meok-cross-post
+- MCP Registry: https://registry.modelcontextprotocol.io
+- Smithery: https://smithery.ai
+- MEOK keiretsu: csoai.org, meok.ai, openscore.ai, proofof.ai, councilof.ai

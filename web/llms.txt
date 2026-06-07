@@ -1,0 +1,45 @@
+# openMCP (meok-cross-post)
+
+> One CLI to audit a Model Context Protocol (MCP) server against a 100-point rubric and cross-post it to every top directory: Smithery, Glama, MCPize, PulseMCP, the MCP Registry, and the Docker MCP Catalog. It pushes to the directories with public APIs (Smithery, MCP Registry) and prints an exact manual checklist for the rest. Apache-2.0, Python 3.10+. By MEOK AI Labs (CSOAI-ORG).
+
+## What it is
+
+meok-cross-post scores a flagship MCP repo 0-100 across five categories, then automates the listings that have public APIs and generates copy-paste checklists (and a ready-to-PR Docker YAML) for the ones that don't.
+
+## The 100-point rubric (5 categories)
+
+- A. Package installability (25): pyproject.toml, hatchling, only-include, mcp>=1.0.0, scripts entry, wheel builds.
+- B. Server correctness (25): server.py imports, mcp object, >=3 docstringed tools, auth_middleware.py, real tests.
+- C. Discovery & directories (25): smithery.yaml (declarative), server.json, server-card.json, glama.json, package.json.
+- D. Distribution & ops (15): Dockerfile.glama, mcp-wrapper.py, public GHCR image, listed on Smithery + MCP Registry.
+- E. CI/CD & docs (10): test/ci/publish workflows, README install+features+license, SECURITY.md.
+- Merge gate: total >= 80 AND every per-category minimum satisfied.
+
+## Commands
+
+- `meok-cross-post audit <path>` : local-only 0-100 scorecard (markdown or --format json).
+- `meok-cross-post audit <path> --network` : adds GHCR / Smithery / MCP Registry probes.
+- `meok-cross-post cross-post <path>` : push metadata to Smithery + MCP Registry (idempotent).
+- `meok-cross-post checklist <path>` : manual directory-submission checklist.
+- `meok-cross-post all <path>` : audit -> cross-post -> checklist.
+
+## Directories covered
+
+Automated (public API): Smithery, MCP Registry. Manual checklist (no public API): Docker MCP Catalog, Glama, MCPize, PulseMCP.
+
+## Install
+
+- `pip install meok-cross-post`
+- `uvx --from meok-cross-post meok-cross-post audit <path>`
+
+## MCP server
+
+Streamable-http (default http://localhost:8000/mcp); run `openmcp`. Tools: audit_repo, cross_post_metadata, manual_checklist.
+
+## Links
+
+- PyPI: https://pypi.org/project/meok-cross-post/
+- GitHub: https://github.com/CSOAI-ORG/meok-cross-post
+- Full detail: /llms-full.txt
+- License: Apache-2.0
+- Vendor: MEOK AI Labs / CSOAI-ORG (csoai.org, meok.ai, openscore.ai, proofof.ai, councilof.ai)

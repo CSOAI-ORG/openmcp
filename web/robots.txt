@@ -1,0 +1,21 @@
+# robots.txt for openMCP (CONFIRM FINAL HOST: openmcp.dev placeholder, may live at a meok.ai path)
+User-agent: *
+Allow: /
+
+# AI answer-engine crawlers are explicitly welcome (AEO).
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://openmcp.dev/sitemap.xml

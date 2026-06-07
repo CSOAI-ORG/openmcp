@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- CONFIRM FINAL HOST: placeholder is openmcp.dev; may instead live at a meok.ai path. -->
+<title>openMCP — Audit &amp; Cross-Post Any MCP Server to Every Directory</title>
+<link rel="canonical" href="https://openmcp.dev/" />
+<meta name="description" content="openMCP (meok-cross-post) is one CLI that audits a Model Context Protocol server against a 100-point rubric and cross-posts it to Smithery, Glama, MCPize, PulseMCP, the MCP Registry, and the Docker MCP Catalog. Apache-2.0, Python 3.10+." />
+<meta name="keywords" content="mcp, model context protocol, smithery, glama, mcpize, pulsemcp, mcp registry, docker mcp catalog, mcp directory, list mcp server, mcp scorecard, openmcp" />
+<meta name="author" content="MEOK AI Labs" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="openMCP — MEOK AI Labs" />
+<meta property="og:title" content="openMCP — Audit &amp; Cross-Post Any MCP Server to Every Directory" />
+<meta property="og:description" content="One CLI: score an MCP server 0-100, then list it on Smithery, Glama, MCPize, PulseMCP, the MCP Registry, and the Docker MCP Catalog." />
+<meta property="og:url" content="https://openmcp.dev/" />
+<meta property="og:image" content="https://openmcp.dev/og-image.png" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="openMCP — audit &amp; cross-post any MCP server" />
+<meta name="twitter:description" content="Score an MCP server on a 100-pt rubric, then list it across Smithery / Glama / MCPize / PulseMCP / MCP Registry / Docker. pip install meok-cross-post" />
+<meta name="twitter:image" content="https://openmcp.dev/og-image.png" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://openmcp.dev/#software",
+      "name": "openMCP (meok-cross-post)",
+      "alternateName": "meok-cross-post",
+      "applicationCategory": "DeveloperApplication",
+      "applicationSubCategory": "MCP directory audit & cross-post CLI",
+      "operatingSystem": "Cross-platform (Python 3.10+)",
+      "description": "One CLI to audit a Model Context Protocol (MCP) server against a 100-point rubric and cross-post it to every top directory: Smithery, Glama, MCPize, PulseMCP, the MCP Registry, and the Docker MCP Catalog. Pushes to the directories with public APIs (Smithery, MCP Registry) and prints an exact manual checklist for the rest.",
+      "url": "https://openmcp.dev",
+      "downloadUrl": "https://pypi.org/project/meok-cross-post/",
+      "softwareVersion": "0.1.0",
+      "programmingLanguage": "Python",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "softwareRequirements": "Python >= 3.10",
+      "keywords": "mcp, model context protocol, smithery, glama, mcpize, pulsemcp, mcp registry, docker mcp catalog, directory, scorecard, audit, cross-post, openmcp, meok",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@id": "https://meok.ai/#organization" },
+      "publisher": { "@id": "https://meok.ai/#organization" },
+      "featureList": [
+        "Audit any MCP server repo 0-100 against a 5-category rubric (installability, server correctness, discovery, distribution, CI/CD & docs)",
+        "Cross-post metadata to the two directories with public APIs: Smithery and the MCP Registry (idempotent)",
+        "Generate exact manual-submission checklists for Docker MCP Catalog, Glama, MCPize, and PulseMCP",
+        "Generate a Docker MCP Catalog YAML template ready to PR",
+        "Metadata consistency pre-flight across smithery.yaml, server.json, glama.json, server-card.json, package.json",
+        "Local-only audit for PR CI plus a --network mode with GHCR / Smithery / MCP Registry probes",
+        "Also runs as an MCP server (audit_repo, cross_post_metadata, manual_checklist) over streamable-http"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://meok.ai/#organization",
+      "name": "MEOK AI Labs",
+      "alternateName": "CSOAI-ORG",
+      "url": "https://meok.ai",
+      "description": "MEOK AI Labs (CSOAI-ORG) builds open-source AI governance, safety, and compliance infrastructure, plus tooling for the Model Context Protocol ecosystem.",
+      "sameAs": [
+        "https://github.com/CSOAI-ORG",
+        "https://csoai.org",
+        "https://openscore.ai",
+        "https://proofof.ai",
+        "https://councilof.ai"
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root { --bg:#0b0e14; --panel:#131822; --fg:#e6e9ef; --muted:#9aa4b2; --acc:#5b8cff; --acc2:#7dd3a8; --border:#222b3a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  a { color:var(--acc); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .wrap { max-width:920px; margin:0 auto; padding:0 20px; }
+  header { padding:64px 0 32px; border-bottom:1px solid var(--border); }
+  h1 { font-size:2.4rem; margin:0 0 8px; letter-spacing:-0.02em; }
+  .tag { color:var(--acc2); font-weight:600; }
+  .lead { font-size:1.2rem; color:var(--muted); max-width:680px; }
+  h2 { font-size:1.5rem; margin:48px 0 12px; letter-spacing:-0.01em; }
+  h3 { font-size:1.1rem; margin:24px 0 6px; }
+  section { border-bottom:1px solid var(--border); padding-bottom:24px; }
+  code, pre { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  pre { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; overflow-x:auto; font-size:0.9rem; }
+  code { background:var(--panel); padding:2px 6px; border-radius:5px; font-size:0.9em; }
+  pre code { background:none; padding:0; }
+  ul { padding-left:20px; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.92rem; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  .badges span { display:inline-block; background:var(--panel); border:1px solid var(--border); border-radius:999px; padding:3px 12px; margin:4px 6px 0 0; font-size:0.82rem; color:var(--muted); }
+  details { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin:8px 0; }
+  summary { cursor:pointer; font-weight:600; }
+  footer { padding:32px 0 64px; color:var(--muted); font-size:0.9rem; }
+  footer a { color:var(--fg); }
+  .cta { display:inline-block; background:var(--acc); color:#fff; padding:10px 18px; border-radius:8px; font-weight:600; margin-top:10px; }
+  .cta:hover { text-decoration:none; opacity:0.92; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>openMCP</h1>
+    <p class="lead"><span class="tag">One CLI to list an MCP server everywhere.</span> Audit a Model Context Protocol server against a 100-point rubric, then cross-post it to every top directory.</p>
+    <div class="badges">
+      <span>Apache-2.0</span>
+      <span>Python 3.10+</span>
+      <span>100-pt rubric</span>
+      <span>69 tests</span>
+      <span>6 directories</span>
+    </div>
+    <p><a class="cta" href="https://pypi.org/project/meok-cross-post/">pip install meok-cross-post</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section>
+  <h2>What it is</h2>
+  <p><code>meok-cross-post</code> (openMCP) scores a flagship MCP server repo 0–100 against a 5-category rubric, then pushes its metadata to the directories that have public APIs (Smithery, the MCP Registry) and prints a clean, exact manual checklist for the ones that don't (Docker MCP Catalog, Glama, MCPize, PulseMCP). Discoverability that's tedious once and impossible at scale, done in one shot.</p>
+</section>
+
+<section>
+  <h2>The 100-point rubric</h2>
+  <table>
+    <tr><th>Category</th><th>Pts</th><th>What it checks</th></tr>
+    <tr><td>A. Package installability</td><td>25</td><td>pyproject.toml, hatchling backend, only-include, mcp&gt;=1.0.0, scripts entry, wheel builds</td></tr>
+    <tr><td>B. Server correctness</td><td>25</td><td>server.py imports, mcp object declared, ≥3 tools, all tools docstringed, auth_middleware.py, real test file</td></tr>
+    <tr><td>C. Discovery &amp; directories</td><td>25</td><td>smithery.yaml (declarative), server.json, server-card.json, glama.json, package.json</td></tr>
+    <tr><td>D. Distribution &amp; ops</td><td>15</td><td>Dockerfile.glama, mcp-wrapper.py, GHCR image public, listed on Smithery, listed on MCP Registry</td></tr>
+    <tr><td>E. CI/CD &amp; docs</td><td>10</td><td>test.yml + ci.yml + publish workflow, README install/features/license, SECURITY.md</td></tr>
+  </table>
+  <p><strong>Merge gate:</strong> total ≥ 80 AND every per-category minimum satisfied. Empty shells score ≤ 4/100 → BLOCK.</p>
+</section>
+
+<section>
+  <h2>Install</h2>
+<pre><code>pip install meok-cross-post
+# or run without installing:
+uvx --from meok-cross-post meok-cross-post audit /path/to/flagship</code></pre>
+
+  <h3>Usage</h3>
+<pre><code>meok-cross-post audit /path/to/flagship                 # markdown scorecard (local-only)
+meok-cross-post audit /path/to/flagship --format json   # JSON for CI / dashboards
+meok-cross-post audit /path/to/flagship --network       # + GHCR / Smithery / MCP Registry probes
+meok-cross-post cross-post /path/to/flagship            # push to Smithery + MCP Registry
+meok-cross-post checklist /path/to/flagship             # manual-submission checklist
+meok-cross-post all /path/to/flagship                   # audit -> cross-post -> checklist</code></pre>
+</section>
+
+<section>
+  <h2>MCP server</h2>
+  <p>openMCP also ships a thin MCP shim over the <strong>streamable-http</strong> transport (default <code>http://localhost:8000/mcp</code>), so any MCP-aware agent can drive the same functionality.</p>
+<pre><code>openmcp                 # starts the shim on $PORT (default 8000)</code></pre>
+  <table>
+    <tr><th>Tool</th><th>What it does</th></tr>
+    <tr><td><code>audit_repo</code></td><td>Score a flagship MCP repo 0-100 against the openMCP rubric.</td></tr>
+    <tr><td><code>cross_post_metadata</code></td><td>Push a flagship repo's metadata to Smithery + the MCP Registry.</td></tr>
+    <tr><td><code>manual_checklist</code></td><td>Return the manual directory-submission checklist as markdown.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>FAQ</h2>
+  <details><summary>What is openMCP / meok-cross-post?</summary><p>A Python CLI (with an MCP shim) that audits a Model Context Protocol server against a 100-point rubric and cross-posts it to Smithery, Glama, MCPize, PulseMCP, the MCP Registry, and the Docker MCP Catalog. Apache-2.0, Python 3.10+.</p></details>
+  <details><summary>How do I list an MCP server on Smithery?</summary><p>Run <code>meok-cross-post cross-post /path/to/repo</code>; openMCP PUTs your display card to Smithery via its public API (and to the MCP Registry). For directories without an API it prints the exact submission URL.</p></details>
+  <details><summary>Which directories does it post to automatically?</summary><p>Two — Smithery and the MCP Registry — because those expose public APIs. Docker MCP Catalog, Glama, MCPize, and PulseMCP have no public API, so openMCP prints an exact manual checklist (and a ready-to-PR Docker YAML) instead of faking a submission.</p></details>
+  <details><summary>Does the audit make network calls?</summary><p>No, by default. <code>audit</code> is local-only so it is safe on the PR hot path. Add <code>--network</code> to enable three probes (GHCR, Smithery, MCP Registry), used in the monthly cron.</p></details>
+  <details><summary>What license is it under?</summary><p>Apache-2.0. (See LICENSE in the repository.)</p></details>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>openMCP (meok-cross-post)</strong> — built by <a href="https://meok.ai">MEOK AI Labs</a> / CSOAI-ORG · <a href="https://github.com/CSOAI-ORG/meok-cross-post">GitHub</a> · <a href="https://pypi.org/project/meok-cross-post/">PyPI</a> · Apache-2.0</p>
+    <p>MEOK keiretsu: <a href="https://csoai.org">csoai.org</a> · <a href="https://meok.ai">meok.ai</a> · <a href="https://openscore.ai">openscore.ai</a> · <a href="https://proofof.ai">proofof.ai</a> · <a href="https://councilof.ai">councilof.ai</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

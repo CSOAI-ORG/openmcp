@@ -1,0 +1,49 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://openmcp.dev/#software",
+      "name": "openMCP (meok-cross-post)",
+      "alternateName": "meok-cross-post",
+      "applicationCategory": "DeveloperApplication",
+      "applicationSubCategory": "MCP directory audit & cross-post CLI",
+      "operatingSystem": "Cross-platform (Python 3.10+)",
+      "description": "One CLI to audit a Model Context Protocol (MCP) server against a 100-point rubric and cross-post it to every top directory: Smithery, Glama, MCPize, PulseMCP, the MCP Registry, and the Docker MCP Catalog. Pushes to the directories with public APIs (Smithery, MCP Registry) and prints an exact manual checklist for the rest.",
+      "url": "https://openmcp.dev",
+      "downloadUrl": "https://pypi.org/project/meok-cross-post/",
+      "softwareVersion": "0.1.0",
+      "programmingLanguage": "Python",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "softwareRequirements": "Python >= 3.10",
+      "keywords": "mcp, model context protocol, smithery, glama, mcpize, pulsemcp, mcp registry, docker mcp catalog, directory, scorecard, audit, cross-post, openmcp, meok",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@id": "https://meok.ai/#organization" },
+      "publisher": { "@id": "https://meok.ai/#organization" },
+      "featureList": [
+        "Audit any MCP server repo 0-100 against a 5-category rubric (installability, server correctness, discovery, distribution, CI/CD & docs)",
+        "Cross-post metadata to the two directories with public APIs: Smithery and the MCP Registry (idempotent)",
+        "Generate exact manual-submission checklists for Docker MCP Catalog, Glama, MCPize, and PulseMCP",
+        "Generate a Docker MCP Catalog YAML template ready to PR",
+        "Metadata consistency pre-flight across smithery.yaml, server.json, glama.json, server-card.json, package.json",
+        "Local-only audit for PR CI plus a --network mode with GHCR / Smithery / MCP Registry probes",
+        "Also runs as an MCP server (audit_repo, cross_post_metadata, manual_checklist) over streamable-http"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://meok.ai/#organization",
+      "name": "MEOK AI Labs",
+      "alternateName": "CSOAI-ORG",
+      "url": "https://meok.ai",
+      "description": "MEOK AI Labs (CSOAI-ORG) builds open-source AI governance, safety, and compliance infrastructure, plus tooling for the Model Context Protocol ecosystem.",
+      "sameAs": [
+        "https://github.com/CSOAI-ORG",
+        "https://csoai.org",
+        "https://openscore.ai",
+        "https://proofof.ai",
+        "https://councilof.ai"
+      ]
+    }
+  ]
+}
