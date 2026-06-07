@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -167,8 +168,9 @@ def write_docker_template(repo: Path, metadata: Dict[str, Any]) -> Path:
         "source": f"https://github.com/CSOAI-ORG/{repo_name}",
         "upstream": f"https://github.com/CSOAI-ORG/{repo_name}",
     }
-    out_dir = Path("/tmp/meok-cross-post")
-    out_dir.mkdir(parents=True, exist_ok=True)
+    # A unique, owner-only temp dir (not a fixed world-writable /tmp path, which
+    # is symlink-attackable). The caller gets the full path back to `cp` from.
+    out_dir = Path(tempfile.mkdtemp(prefix="meok-cross-post-"))
     out = out_dir / f"{repo_name}-docker-catalog.yaml"
     out.write_text(yaml.safe_dump(template, sort_keys=False))
     return out

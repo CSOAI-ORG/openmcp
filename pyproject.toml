@@ -58,3 +58,11 @@ only-include = ["meok_cross_post", "server.py"]
 testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = "--ignore=tests/fixtures"
+
+[tool.bandit]
+# B104 (bind 0.0.0.0): inherent to a deployable MCP server — the platform
+#   (Cloud Run / AgentCore) controls ingress + terminates TLS.
+# B108 (hardcoded /tmp): the remaining hits are env-var *values* ("HOME"/"TMPDIR")
+#   passed to a hermetic audit subprocess, not insecure temp-file creation. The
+#   one real predictable-path write was fixed to use tempfile.mkdtemp().
+skips = ["B104", "B108"]

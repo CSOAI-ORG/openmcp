@@ -30,5 +30,14 @@ jobs:
       - name: Lint with ruff
         run: ruff check . --select E,W,F --ignore E501 || true
 
+      - name: SAST — Bandit (fail on medium+/high)
+        run: |
+          pip install bandit pip-audit
+          # -ll = medium+/high only; benign categories skipped via [tool.bandit].
+          bandit -c pyproject.toml -r meok_cross_post server.py mcp-wrapper.py auth_middleware.py -ll
+
+      - name: Dependency audit — pip-audit
+        run: pip-audit || true
+
       - name: Run tests
         run: pytest tests/ -v --tb=short 2>/dev/null || pytest -v --tb=short 2>/dev/null || echo "No tests found"

@@ -57,7 +57,7 @@ def probe(owner: str, image: str, tag: str = "latest") -> dict:
                       "application/vnd.docker.distribution.manifest.v2+json,"
                       "application/vnd.docker.distribution.manifest.list.v2+json",
         })
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:  # nosec B310 — fixed https://ghcr.io host, no user-controlled scheme
             latency = int((time.time() - start) * 1000)
             result = {
                 "found": True,
