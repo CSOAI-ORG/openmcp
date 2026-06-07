@@ -5,6 +5,8 @@ Subcommands:
   cross-post   Push metadata to Smithery + MCP Registry
   checklist    Print the manual directory submission checklist
   all          audit + cross-post + checklist, in that order
+  refine       audit → gap-report (→ scaffold) → re-audit → gate → cross-post
+  fleet        Audit many repos into one scoreboard
   auth         One-time auth bootstrap (GitHub PAT → keyring)
 """
 
@@ -18,9 +20,12 @@ from pathlib import Path
 import click
 
 from meok_cross_post import __version__
+from meok_cross_post import fleet as fleet_mod
+from meok_cross_post import scaffold as scaffold_mod
 from meok_cross_post.audit import Audit, score as audit_score
 from meok_cross_post.cross_post import run as cross_post_run
 from meok_cross_post.manual_checklist import render_checklist
+from meok_cross_post.refine import gap_report
 from meok_cross_post.render import scorecard_markdown
 
 
@@ -140,6 +145,130 @@ def all(repo: Path, network: bool, force: bool) -> None:
     # 4) manual checklist
     click.echo(result.manual_checklist)
 
+    sys.exit(0)
+
+
+def _do_cross_post(repo: Path) -> None:
+    """Run cross_post and print its results (shared by refine/fleet)."""
+    result = cross_post_run(repo)
+    if not result.preflight_ok:
+        click.echo("Pre-flight FAILED — refusing to publish inconsistent metadata:",
+                   err=True)
+        for e in result.preflight_errors:
+            click.echo(f"  - {e}", err=True)
+        sys.exit(1)
+    click.echo("=== Cross-post results ===")
+    for d in result.directories:
+        status = "✓" if d.ok else "✗"
+        click.echo(f"  [{status}] {d.directory}: {d.message}"
+                   f"{f' (HTTP {d.status_code})' if d.status_code else ''}")
+    click.echo("")
+    click.echo(result.manual_checklist)
+
+
+@main.command()
+@click.argument("repo", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.option("--scaffold", "do_scaffold", is_flag=True, default=False,
+              help="Create the SAFE missing static discovery files, then re-audit. "
+                   "Never writes server.py or runs repo code.")
+@click.option("--no-post", is_flag=True, default=False,
+              help="Audit/refine only — never cross-post even if the gate passes.")
+@click.option("--allow-network", is_flag=True, default=False,
+              help="Enable the 3 network probes during the audit.")
+def refine(repo: Path, do_scaffold: bool, no_post: bool, allow_network: bool) -> None:
+    """Audit REPO, print a gap report, optionally scaffold + re-audit, then gate.
+
+    The loop: audit → if MERGE report ready (and cross-post unless --no-post);
+    else print a precise GAP REPORT. With --scaffold, create the safe missing
+    static discovery files, re-audit, print the new score, and cross-post if it
+    now passes (unless --no-post).
+    """
+    if allow_network:
+        os.environ["MEOK_ALLOW_NETWORK"] = "1"
+
+    sc = audit_score(repo, allow_network=allow_network)
+    click.echo(sc.to_markdown())
+    click.echo("")
+
+    if sc.gate.value == "merge":
+        click.echo(f"✓ {sc.repo_name} is READY (gate=MERGE, {sc.total_points}/{sc.eligible_points}).")
+        if not no_post:
+            click.echo("")
+            _do_cross_post(repo)
+        sys.exit(0)
+
+    # Below the gate — show the actionable gap report.
+    click.echo(gap_report(sc))
+
+    if not do_scaffold:
+        click.echo("")
+        click.echo("Re-run with --scaffold to auto-create the SAFE missing discovery files "
+                   "(smithery.yaml, server.json, .well-known/mcp/server-card.json, "
+                   "package.json, glama.json, SECURITY.md).", err=True)
+        sys.exit(1)
+
+    # Scaffold the safe static files, then re-audit.
+    written = scaffold_mod.scaffold(repo)
+    click.echo("")
+    if written:
+        click.echo("=== Scaffolded safe discovery files ===")
+        for rel in written:
+            click.echo(f"  + {rel}")
+    else:
+        click.echo("No missing scaffoldable files — nothing to create.")
+    click.echo("")
+
+    sc2 = audit_score(repo, allow_network=allow_network)
+    click.echo("=== Re-audit after scaffold ===")
+    click.echo(sc2.to_markdown())
+    click.echo("")
+
+    if sc2.gate.value == "merge":
+        click.echo(f"✓ {sc2.repo_name} now PASSES (gate=MERGE, "
+                   f"{sc2.total_points}/{sc2.eligible_points}).")
+        if not no_post:
+            click.echo("")
+            _do_cross_post(repo)
+        sys.exit(0)
+
+    click.echo(gap_report(sc2))
+    click.echo("")
+    click.echo("Still below the merge gate after scaffold — the remaining gaps need "
+               "server.py / CI work (not auto-scaffoldable).", err=True)
+    sys.exit(1)
+
+
+@main.command()
+@click.argument("paths", nargs=-1,
+                type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.option("--json", "as_json", is_flag=True, default=False,
+              help="Emit a machine-readable JSON scoreboard.")
+@click.option("--threshold", type=int, default=80,
+              help="Override the pass gate for the summary count. Default: 80.")
+@click.option("--allow-network", is_flag=True, default=False,
+              help="Enable the 3 network probes during each audit.")
+def fleet(paths: tuple, as_json: bool, threshold: int, allow_network: bool) -> None:
+    """Audit many repos (PATHS) into one ranked scoreboard.
+
+    With no PATHS, globs the immediate subdirectories of the current dir that
+    contain a pyproject.toml. Audits run in parallel. Prints a markdown table
+    (repo | score | gate | top failing category) sorted by score desc, plus a
+    summary line. Use --json for machine-readable output.
+    """
+    if allow_network:
+        os.environ["MEOK_ALLOW_NETWORK"] = "1"
+
+    repos = list(paths) if paths else fleet_mod.discover_repos(Path.cwd())
+    if not repos:
+        click.echo("No repos found (no PATHS given and no ./*/pyproject.toml).", err=True)
+        sys.exit(1)
+
+    cards = fleet_mod.audit_many(repos, allow_network=allow_network)
+
+    if as_json:
+        click.echo(json.dumps(fleet_mod.scoreboard_json(cards, threshold=threshold), indent=2))
+    else:
+        click.echo(fleet_mod.scoreboard_markdown(cards, threshold=threshold))
     sys.exit(0)
 
 
