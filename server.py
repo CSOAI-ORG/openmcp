@@ -19,9 +19,30 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 from meok_cross_post import __version__
-from meok_cross_post.audit import score as _audit_score
+from meok_cross_post.audit import (
+    Audit,
+    DEFAULT_CHECKS,
+    check_server_py_imports_clean,
+)
 from meok_cross_post.cross_post import run as _cross_post_run
 from meok_cross_post.manual_checklist import render_checklist as _render_checklist
+
+# SECURITY: `check_server_py_imports_clean` runs `python -c "import server"` with
+# the TARGET path on PYTHONPATH — it executes code from the audited repo. Fine
+# for the local CLI (you trust the repo you point at), but a remote-code-
+# execution vector the moment `audit_repo` is reachable over the network MCP
+# transport. The network tool runs a code-execution-free subset; the local
+# `meok-cross-post audit` CLI keeps the full check set.
+_NETWORK_SAFE_CHECKS = [c for c in DEFAULT_CHECKS if c is not check_server_py_imports_clean]
+
+
+def _safe_audit_path(path: str) -> Path:
+    """Resolve + validate a caller-supplied audit path. Rejects non-existent or
+    non-directory targets so the tool can't be used to probe arbitrary files."""
+    p = Path(path).resolve()
+    if not p.is_dir():
+        raise ValueError(f"audit path must be an existing directory: {path!r}")
+    return p
 
 mcp = FastMCP(
     "openmcp",
@@ -47,9 +68,10 @@ def audit_repo(path: str, allow_network: bool = False) -> dict:
 
     Returns:
         A dict with score, gate verdict, category breakdown, and the
-        per-check details.
+        per-check details. (The `import server` check is skipped over the
+        network for safety — see module security note.)
     """
-    sc = _audit_score(Path(path), allow_network=allow_network)
+    sc = Audit(checks=_NETWORK_SAFE_CHECKS).score(_safe_audit_path(path), allow_network=allow_network)
     return sc.to_dict()
 
 
