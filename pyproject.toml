@@ -52,7 +52,7 @@ openmcp = "meok_cross_post.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["meok_cross_post"]
-only-include = ["meok_cross_post"]
+only-include = ["meok_cross_post", "server.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
