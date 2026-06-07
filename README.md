@@ -68,7 +68,7 @@ The audit scorecard is a 100-pt rubric across 5 categories:
 meok-cross-post cross-post /path/to/flagship
 ```
 
-Pushes to the two automatable directories (Smithery + MCP Registry). For the other four, prints the manual checklist.
+Pushes to the two automatable directories (Smithery + MCP Registry) **concurrently** — they hit different APIs with no ordering dependency, so the directory pushes fan out in parallel (a failure in one never aborts the other). For the other four directories, prints the manual checklist.
 
 ### Manual checklist only
 
@@ -81,6 +81,39 @@ meok-cross-post checklist /path/to/flagship
 ```bash
 meok-cross-post all /path/to/flagship            # audit → cross-post → checklist
 meok-cross-post all /path/to/flagship --force     # skip the score gate
+```
+
+### Refine — audit → gap-report → (scaffold) → re-audit → gate → cross-post
+
+`refine` codifies the manual remediation loop. It audits the repo; if it already meets the merge gate it reports "ready" and (unless `--no-post`) cross-posts. Otherwise it prints a precise **gap report** — for every failed/low check, the check id, what's missing, and the exact remediation — grouped by category.
+
+```bash
+meok-cross-post refine /path/to/flagship                 # audit + gap report (exit 1 if below gate)
+meok-cross-post refine /path/to/flagship --no-post        # never cross-post, even if it passes
+meok-cross-post refine /path/to/flagship --scaffold       # create the SAFE missing files, re-audit, then post
+meok-cross-post refine /path/to/flagship --allow-network  # include the 3 network probes
+```
+
+`--scaffold` creates **only** the safe static discovery files that are missing — `smithery.yaml`, `server.json`, `.well-known/mcp/server-card.json`, `package.json`, `glama.json`, `SECURITY.md` — derived from the repo's `pyproject.toml` (name/description/version) and the `@mcp.tool` functions in `server.py`. It **never** writes `server.py` and **never** executes repo code. After scaffolding it re-audits, prints the new score, and (if it now passes and not `--no-post`) cross-posts.
+
+### Fleet — one scoreboard for many repos
+
+`fleet` audits many repos in parallel and prints one ranked markdown scoreboard: which repos are ready to blast.
+
+```bash
+meok-cross-post fleet                                # globs ./*/pyproject.toml subdirs
+meok-cross-post fleet ../repo-a ../repo-b            # explicit paths
+meok-cross-post fleet --json                          # machine-readable
+meok-cross-post fleet --threshold 90                  # override the pass gate for the summary
+```
+
+```
+| Repo | Score | Gate | Top failing category |
+|---|---|---|---|
+| threat-intelligence | 100 | 🟢 | D_distribution |
+| bare-thing          |  12 | 🔴 | B_server |
+
+**2 repos, 1 passing (MERGE, score ≥ 80), mean score 56.0.**
 ```
 
 ### One-time auth setup

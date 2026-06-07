@@ -14,8 +14,11 @@ FLEET_BASE.md) and cross-posts its metadata to:
     - MCPize:             mcpize.com/developer dashboard
     - PulseMCP:           pulsemcp.com/submit form
 
-CLI:    meok-cross-post {audit,cross-post,checklist,all,auth} <path>
+CLI:    meok-cross-post {audit,cross-post,refine,fleet,checklist,all,auth} <path>
 MCP:    python -m meok_cross_post.mcp_server  (3 @mcp.tool() shim)
+
+`refine` runs the audit→gap-report→(scaffold)→re-audit→gate→cross-post loop
+for one repo; `fleet` audits many repos in parallel into one ranked scoreboard.
 """
 
 __version__ = "0.1.0"
