@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.csoai-org/meok-cross-post",
+  "description": "Audit + cross-post flagship MCP servers to Smithery, MCP Registry, Docker Catalog, Glama, MCPize, PulseMCP -- one CLI for the whole directory ecosystem.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/CSOAI-ORG/meok-cross-post",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "meok-cross-post",
+      "version": "0.1.0",
+      "transport": {
+        "type": "streamable-http"
+      }
+    }
+  ]
+}

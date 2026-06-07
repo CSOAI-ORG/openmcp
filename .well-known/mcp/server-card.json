@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.smithery.ai/server-card.json",
+  "name": "openmcp",
+  "description": "Audit + cross-post flagship MCP servers to Smithery, MCP Registry, Docker Catalog, Glama, MCPize, PulseMCP -- one CLI for the whole directory ecosystem.",
+  "version": "0.1.0",
+  "vendor": "MEOK AI Labs",
+  "homepage": "https://github.com/CSOAI-ORG/meok-cross-post",
+  "repository": "https://github.com/CSOAI-ORG/meok-cross-post",
+  "transport": {
+    "type": "streamable-http",
+    "url": "http://localhost:8000/mcp"
+  },
+  "tools": [
+    {
+      "name": "audit_repo",
+      "description": "Score a flagship MCP repo 0-100 against the openMCP rubric."
+    },
+    {
+      "name": "cross_post_metadata",
+      "description": "Push a flagship repo's metadata to Smithery + MCP Registry."
+    },
+    {
+      "name": "manual_checklist",
+      "description": "Return the manual directory-submission checklist as markdown."
+    }
+  ]
+}

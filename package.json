@@ -1,0 +1,15 @@
+{
+  "name": "meok-cross-post",
+  "version": "0.1.0",
+  "description": "Audit + cross-post flagship MCP servers to Smithery, MCP Registry, Docker Catalog, Glama, MCPize, PulseMCP -- one CLI for the whole directory ecosystem.",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/CSOAI-ORG/meok-cross-post",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CSOAI-ORG/meok-cross-post.git"
+  },
+  "mcp": {
+    "entry": "server:main",
+    "transport": "streamable-http"
+  }
+}

@@ -1,0 +1,18 @@
+# Declarative Smithery manifest for openMCP (meok-cross-post).
+# No `runtime:` key -> declarative form. Tools are listed explicitly.
+name: openmcp
+displayName: openMCP
+description: >-
+  Audit + cross-post flagship MCP servers to Smithery, MCP Registry, Docker
+  Catalog, Glama, MCPize, PulseMCP -- one CLI for the whole directory ecosystem.
+homepage: https://github.com/CSOAI-ORG/meok-cross-post
+license: Apache-2.0
+startCommand:
+  type: http
+tools:
+  - name: audit_repo
+    description: Score a flagship MCP repo 0-100 against the openMCP rubric.
+  - name: cross_post_metadata
+    description: Push a flagship repo's metadata to Smithery + MCP Registry.
+  - name: manual_checklist
+    description: Return the manual directory-submission checklist as markdown.
