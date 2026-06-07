@@ -2,7 +2,7 @@
 
 **One CLI to audit a flagship MCP server and cross-post it to every top directory.**
 
-`meok-cross-post` is the keystone tool for the MEOK fleet's directory presence. It scores a flagship MCP repo 0–100 against the [FLEET_BASE.md](https://github.com/CSOAI-ORG/meok-compliance-gateway/blob/main/FLEET_BASE.md) template, and pushes its metadata to the directories that have public APIs. For the directories that don't, it prints a clean manual checklist and exits 0.
+`meok-cross-post` is the keystone tool for the MEOK fleet's directory presence — the discovery layer for the MEOK **EU AI Act / DORA / NIS2 / CRA** compliance servers. It scores a flagship MCP repo 0–100 against the [FLEET_BASE.md](https://github.com/CSOAI-ORG/meok-compliance-gateway/blob/main/FLEET_BASE.md) template, and pushes its metadata to the directories that have public APIs. For the directories that don't, it prints a clean manual checklist and exits 0. 82 tests passing, Apache-2.0.
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -124,7 +124,13 @@ meok-cross-post auth bootstrap      # GitHub PAT → keyring (for MCP Registry J
 
 ## As an MCP server
 
-`meok-cross-post` also ships a 50-line MCP shim. It exposes the same 3 tools (`audit_repo`, `cross_post_repo`, `manual_checklist_for`) over streamable-HTTP, so any MCP-aware agent can drive it.
+`meok-cross-post` also ships a 50-line MCP shim. It exposes 3 tools over streamable-HTTP, so any MCP-aware agent can drive it:
+
+| Tool | Description |
+|---|---|
+| `audit_repo` | Score an MCP server repo 0–100 against the openMCP listing-readiness rubric; returns a merge/block verdict + per-category breakdown. **Read-only.** |
+| `cross_post_metadata` | Push a repo's metadata to Smithery and the MCP Registry (the two directories with public APIs); returns per-directory results. |
+| `manual_checklist` | Return the manual submission checklist as markdown for directories without a public API (Docker MCP Catalog, Glama, MCPize, PulseMCP). **Read-only.** |
 
 ```bash
 openmcp                                     # starts the shim on $PORT (default 8000)

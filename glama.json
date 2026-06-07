@@ -1,4 +1,12 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "maintainers": ["CSOAI-ORG"]
+  "name": "openmcp",
+  "description": "openMCP: audit + cross-post tool for MCP servers. Scores an MCP server repo 0-100 for listing-readiness and cross-posts it to Smithery, the MCP Registry, Docker MCP Catalog, Glama, MCPize, and PulseMCP -- the discovery layer for the MEOK EU AI Act / DORA / NIS2 / CRA compliance fleet.",
+  "maintainers": ["CSOAI-ORG"],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/CSOAI-ORG/meok-cross-post",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CSOAI-ORG/meok-cross-post"
+  }
 }

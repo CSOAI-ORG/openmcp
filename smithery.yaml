@@ -3,16 +3,55 @@
 name: openmcp
 displayName: openMCP
 description: >-
-  Audit + cross-post flagship MCP servers to Smithery, MCP Registry, Docker
-  Catalog, Glama, MCPize, PulseMCP -- one CLI for the whole directory ecosystem.
+  Audit + cross-post tool for MCP servers. Scores an MCP server repo 0-100 for
+  listing-readiness and cross-posts it to Smithery, the MCP Registry, Docker MCP
+  Catalog, Glama, MCPize, and PulseMCP — the discovery layer for the MEOK
+  EU AI Act / DORA / NIS2 / CRA compliance fleet. AI governance tooling and
+  agent compliance audit.
+icon: icon.svg
 homepage: https://github.com/CSOAI-ORG/meok-cross-post
 license: Apache-2.0
+
+# System prompt: tells an agent when and how to reach for this server.
+systemPrompt: >-
+  Use openMCP to make an MCP server repo discoverable. Call audit_repo to score
+  a repo 0-100 against the listing-readiness rubric (returns a merge/block
+  verdict and per-category breakdown); cross_post_metadata to publish its
+  metadata to Smithery and the MCP Registry; and manual_checklist to get the
+  manual submission steps for directories without a public API (Docker MCP
+  Catalog, Glama, MCPize, PulseMCP). audit_repo and manual_checklist are
+  read-only; cross_post_metadata publishes to external directories.
+
 startCommand:
   type: http
+  # Optional connection config. All fields optional so the server connects with
+  # zero configuration; set apiKey only if the deployed endpoint requires auth.
+  configSchema:
+    type: object
+    properties:
+      apiKey:
+        type: string
+        title: API key
+        description: Optional bearer token if the deployed endpoint requires auth.
+    additionalProperties: false
+
 tools:
   - name: audit_repo
-    description: Score a flagship MCP repo 0-100 against the openMCP rubric.
+    title: Audit MCP repo
+    readOnlyHint: true
+    description: >-
+      Score an MCP server repo 0-100 against the openMCP listing-readiness
+      rubric and return a merge/block verdict with a per-category breakdown.
   - name: cross_post_metadata
-    description: Push a flagship repo's metadata to Smithery + MCP Registry.
+    title: Cross-post metadata
+    readOnlyHint: false
+    description: >-
+      Push a repo's metadata to Smithery and the MCP Registry (the two
+      directories with public APIs); returns per-directory results.
   - name: manual_checklist
-    description: Return the manual directory-submission checklist as markdown.
+    title: Manual submission checklist
+    readOnlyHint: true
+    description: >-
+      Return the manual directory-submission checklist as markdown for the
+      directories without a public API (Docker MCP Catalog, Glama, MCPize,
+      PulseMCP).

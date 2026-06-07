@@ -1,12 +1,19 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.csoai-org/meok-cross-post",
-  "description": "Audit + cross-post flagship MCP servers to Smithery, MCP Registry, Docker Catalog, Glama, MCPize, PulseMCP -- one CLI for the whole directory ecosystem.",
+  "description": "openMCP: audit + cross-post tool for MCP servers. Scores an MCP server repo 0-100 for listing-readiness and cross-posts it to Smithery, the MCP Registry, Docker MCP Catalog, Glama, MCPize, and PulseMCP -- the discovery layer for the MEOK EU AI Act / DORA / NIS2 / CRA compliance fleet. MCP server, AI governance tooling, agent compliance audit.",
   "version": "0.1.0",
   "repository": {
     "url": "https://github.com/CSOAI-ORG/meok-cross-post",
     "source": "github"
   },
+  "_deploymentNote": "The `remotes[0].url` below is a LAUNCH PLACEHOLDER. Set it to the real public streamable-http endpoint at deploy time before publishing to the MCP Registry. Remote-only listing (no published package) is registry-valid; the PyPI package below is an optional second install path and may be omitted if PyPI is not yet published.",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.openmcp.meok.ai/mcp"
+    }
+  ],
   "packages": [
     {
       "registryType": "pypi",
