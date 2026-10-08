@@ -25,7 +25,7 @@ classifiers = [
   "Topic :: Security",
 ]
 dependencies = [
-  "mcp>=1.0.0",
+  "mcp>=2.0.0",
   "click>=8.1.0",
   "requests>=2.31.0",
   "pydantic>=2.5.0",
@@ -52,7 +52,7 @@ openmcp = "meok_cross_post.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["meok_cross_post"]
-only-include = ["meok_cross_post", "server.py"]
+only-include = ["meok_cross_post", "server.py", "mcp2026_shim.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
